@@ -37,10 +37,62 @@ export function clearSession() {
 
 /* ── Demo accounts ───────────────────────────────────────── */
 const DEMOS = [
-  { username: 'demo',  password: 'demo123',  avatar: '📊' },
-  { username: 'vivek', password: 'vivek123', avatar: '🚀' },
-  { username: 'admin', password: 'admin123', avatar: '⚡' },
+  { username: 'demo',  password: 'demo123',  tag: 'guest'   },
+  { username: 'vivek', password: 'vivek123', tag: 'trader'  },
+  { username: 'admin', password: 'admin123', tag: 'admin'   },
 ]
+
+/* Static candlestick mini-chart used as the hero panel.
+   The data is hand-tuned to look like a realistic intraday tape — bull
+   bias with a mid-day pullback. Pure decoration. */
+const CANDLES = [
+  { o: 32, c: 38, h: 41, l: 30, dir: 'up' },
+  { o: 38, c: 36, h: 40, l: 34, dir: 'down' },
+  { o: 36, c: 44, h: 46, l: 35, dir: 'up' },
+  { o: 44, c: 50, h: 52, l: 43, dir: 'up' },
+  { o: 50, c: 48, h: 52, l: 46, dir: 'down' },
+  { o: 48, c: 55, h: 58, l: 47, dir: 'up' },
+  { o: 55, c: 52, h: 56, l: 49, dir: 'down' },
+  { o: 52, c: 60, h: 62, l: 51, dir: 'up' },
+  { o: 60, c: 58, h: 63, l: 56, dir: 'down' },
+  { o: 58, c: 66, h: 68, l: 57, dir: 'up' },
+  { o: 66, c: 70, h: 73, l: 65, dir: 'up' },
+  { o: 70, c: 68, h: 72, l: 66, dir: 'down' },
+]
+
+function CandleChart() {
+  // Map candle values (10–80 ish) to SVG y coords (10–110, inverted)
+  const W = 240, H = 120, pad = 8, count = CANDLES.length
+  const colW = (W - pad * 2) / count
+  const yScale = v => H - pad - ((v - 28) / 50) * (H - pad * 2)
+
+  return (
+    <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
+      {/* faint horizontal grid lines */}
+      {[0.25, 0.5, 0.75].map(p => (
+        <line key={p} x1={pad} x2={W - pad} y1={pad + (H - pad * 2) * p} y2={pad + (H - pad * 2) * p}
+          stroke="rgba(255,255,255,0.04)" strokeDasharray="2 4" />
+      ))}
+      {CANDLES.map((c, i) => {
+        const cx = pad + colW * (i + 0.5)
+        const color = c.dir === 'up' ? '#00d4aa' : '#ff4d6d'
+        const yHigh = yScale(c.h)
+        const yLow  = yScale(c.l)
+        const yOpen = yScale(c.o)
+        const yClose = yScale(c.c)
+        const yTop = Math.min(yOpen, yClose)
+        const yBot = Math.max(yOpen, yClose)
+        return (
+          <g key={i}>
+            <line x1={cx} x2={cx} y1={yHigh} y2={yLow} stroke={color} strokeWidth="1" opacity="0.7" />
+            <rect x={cx - colW * 0.32} y={yTop} width={colW * 0.64} height={Math.max(yBot - yTop, 1.5)}
+              fill={color} rx="0.5" />
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
 
 /* ═══════════════════════════════════════════════════════════
    LOGIN PAGE
@@ -112,9 +164,8 @@ export default function LoginPage({ onLogin }) {
   const switchTab = t => { setTab(t); setErrors({}); setApiErr(''); setSuccess(false) }
 
   return (
-    <div style={{
+    <div className="chart-grid-bg" style={{
       minHeight: '100vh',
-      background: '#07090f',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
@@ -174,30 +225,60 @@ export default function LoginPage({ onLogin }) {
       }}>
 
         {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 32 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 11, marginBottom: 24 }}>
           <div style={{
-            width: 40, height: 40, borderRadius: 11,
-            background: 'linear-gradient(135deg, #00d4aa, #6366f1)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20,
-          }}>📈</div>
+            width: 40, height: 40, borderRadius: 8,
+            background: 'rgba(15,17,28,0.9)',
+            border: '1px solid rgba(0,212,170,0.22)',
+            display: 'flex', alignItems: 'flex-end', justifyContent: 'center',
+            gap: 3, padding: '5px 7px',
+          }}>
+            <span style={{ position: 'relative', width: 5, height: '78%' }}>
+              <span style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1.2, transform: 'translateX(-50%)', background: '#00d4aa', opacity: 0.55 }} />
+              <span style={{ position: 'absolute', left: 0, right: 0, top: '20%', bottom: '15%', background: '#00d4aa', borderRadius: 1 }} />
+            </span>
+            <span style={{ position: 'relative', width: 5, height: '60%' }}>
+              <span style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1.2, transform: 'translateX(-50%)', background: '#ff4d6d', opacity: 0.55 }} />
+              <span style={{ position: 'absolute', left: 0, right: 0, top: '15%', bottom: '25%', background: '#ff4d6d', borderRadius: 1 }} />
+            </span>
+            <span style={{ position: 'relative', width: 5, height: '92%' }}>
+              <span style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1.2, transform: 'translateX(-50%)', background: '#00d4aa', opacity: 0.55 }} />
+              <span style={{ position: 'absolute', left: 0, right: 0, top: '8%', bottom: '12%', background: '#00d4aa', borderRadius: 1 }} />
+            </span>
+          </div>
           <div>
-            <div style={{ fontSize: 20, fontWeight: 900, color: '#e2e8f0', letterSpacing: '-0.02em' }}>
+            <div style={{ fontSize: 20, fontWeight: 800, color: '#e2e8f0', letterSpacing: '-0.02em' }}>
               Stock<span style={{ color: '#00d4aa' }}>Pulse</span>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginTop: 1 }}>
-              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00d4aa', animation: 'pulse 1.5s ease infinite' }} />
-              <span style={{ fontSize: 10, color: '#00d4aa', fontWeight: 600, letterSpacing: '0.05em' }}>LIVE MARKETS</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#00d4aa', animation: 'pulse 1.6s ease infinite' }} />
+              <span style={{ fontSize: 10, color: '#64748b', fontWeight: 600, letterSpacing: '0.10em', fontFamily: 'JetBrains Mono, monospace' }}>NYSE · NASDAQ · CRYPTO</span>
             </div>
           </div>
         </div>
 
-        {/* Heading */}
-        <div style={{ marginBottom: 24 }}>
-          <div style={{ fontSize: 22, fontWeight: 800, color: '#f1f5f9', marginBottom: 4, letterSpacing: '-0.02em' }}>
-            {tab === 'login' ? 'Welcome back 👋' : 'Create account ✨'}
+        {/* Mini candle chart panel — static, decorative */}
+        <div style={{
+          marginBottom: 22,
+          background: 'rgba(8,10,18,0.6)',
+          border: '1px solid rgba(255,255,255,0.05)',
+          borderRadius: 10,
+          padding: '10px 12px 8px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+            <span style={{ fontSize: 10, fontWeight: 700, color: '#64748b', letterSpacing: '0.08em', fontFamily: 'JetBrains Mono, monospace' }}>SPX · 1D</span>
+            <span style={{ fontSize: 11, color: '#00d4aa', fontFamily: 'JetBrains Mono, monospace', fontWeight: 700 }}>+1.24%</span>
           </div>
-          <div style={{ fontSize: 13, color: '#475569' }}>
-            {tab === 'login' ? 'Sign in to your trading dashboard' : 'Join StockPulse for free'}
+          <CandleChart />
+        </div>
+
+        {/* Heading */}
+        <div style={{ marginBottom: 22 }}>
+          <div style={{ fontSize: 20, fontWeight: 700, color: '#f1f5f9', marginBottom: 4, letterSpacing: '-0.015em' }}>
+            {tab === 'login' ? 'Sign in' : 'Create account'}
+          </div>
+          <div style={{ fontSize: 12, color: '#64748b' }}>
+            {tab === 'login' ? 'Access your watchlist and portfolio' : 'Track tickers, build watchlists, paper-trade'}
           </div>
         </div>
 
@@ -215,15 +296,15 @@ export default function LoginPage({ onLogin }) {
 
         {/* Api error */}
         {apiErr && (
-          <div style={{ background: 'rgba(255,77,109,0.08)', border: '1px solid rgba(255,77,109,0.2)', borderRadius: 9, padding: '9px 13px', marginBottom: 16, fontSize: 12, color: '#ff4d6d' }}>
-            🚫 {apiErr}
+          <div style={{ background: 'rgba(255,77,109,0.08)', border: '1px solid rgba(255,77,109,0.2)', borderRadius: 9, padding: '9px 13px', marginBottom: 16, fontSize: 12, color: '#ff4d6d', fontFamily: 'JetBrains Mono, monospace' }}>
+            <span style={{ opacity: 0.7, marginRight: 6 }}>ERR</span>{apiErr}
           </div>
         )}
 
         {/* Success */}
         {success && (
           <div style={{ background: 'rgba(0,212,170,0.08)', border: '1px solid rgba(0,212,170,0.2)', borderRadius: 9, padding: '9px 13px', marginBottom: 16, fontSize: 12, color: '#00d4aa' }}>
-            ✅ Account created — sign in below.
+            Account created — sign in below.
           </div>
         )}
 
@@ -259,14 +340,18 @@ export default function LoginPage({ onLogin }) {
                   outline: 'none', transition: 'all 0.2s',
                 }}
               />
-              <button type="button" onClick={() => setShowPwd(s => !s)} style={{
-                position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
-                background: 'none', border: 'none', cursor: 'pointer', color: '#475569', fontSize: 14, padding: 0,
+              <button type="button" onClick={() => setShowPwd(s => !s)} aria-label={showPwd ? 'Hide password' : 'Show password'} style={{
+                position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)',
+                background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', padding: 4,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
               }}>
-                {showPwd ? '🙈' : '👁'}
+                {showPwd
+                  ? <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+                  : <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                }
               </button>
             </div>
-            {errors.password && <div style={{ fontSize: 11, color: '#ff4d6d', marginTop: 4 }}>⚠ {errors.password}</div>}
+            {errors.password && <div style={{ fontSize: 11, color: '#ff4d6d', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}><span style={{ opacity: 0.7, marginRight: 6 }}>ERR</span>{errors.password}</div>}
           </div>
 
           {tab === 'register' && (
@@ -285,8 +370,8 @@ export default function LoginPage({ onLogin }) {
             animation: shake ? 'shake 0.4s ease' : 'none',
           }}>
             {loading
-              ? <><span style={{ width: 15, height: 15, border: '2px solid rgba(0,212,170,0.25)', borderTopColor: '#00d4aa', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Please wait…</>
-              : tab === 'login' ? '🚀 Sign In' : '✨ Create Account'
+              ? <><span style={{ width: 15, height: 15, border: '2px solid rgba(0,212,170,0.25)', borderTopColor: '#00d4aa', borderRadius: '50%', display: 'inline-block', animation: 'spin 0.7s linear infinite' }} /> Authenticating…</>
+              : tab === 'login' ? 'Sign In' : 'Create Account'
             }
           </button>
         </form>
@@ -308,19 +393,24 @@ export default function LoginPage({ onLogin }) {
                     border: '1px solid rgba(255,255,255,0.06)',
                     cursor: 'pointer', transition: 'background 0.2s', width: '100%',
                   }}>
-                  <span style={{ fontSize: 16 }}>{u.avatar}</span>
-                  <span style={{ fontFamily: 'JetBrains Mono,monospace', color: '#6366f1', fontSize: 12, fontWeight: 700 }}>{u.username}</span>
+                  <span style={{
+                    fontSize: 9, fontWeight: 700, letterSpacing: '0.08em',
+                    color: '#64748b', textTransform: 'uppercase',
+                    border: '1px solid rgba(100,116,139,0.3)', borderRadius: 4,
+                    padding: '2px 6px', fontFamily: 'JetBrains Mono,monospace',
+                  }}>{u.tag}</span>
+                  <span style={{ fontFamily: 'JetBrains Mono,monospace', color: '#94a3b8', fontSize: 12, fontWeight: 700 }}>{u.username}</span>
                   <span style={{ color: '#1e293b', fontSize: 11 }}>/</span>
                   <span style={{ fontFamily: 'JetBrains Mono,monospace', color: '#334155', fontSize: 11 }}>{u.password}</span>
-                  <span style={{ marginLeft: 'auto', fontSize: 10, color: '#00d4aa', fontWeight: 700, letterSpacing: '0.04em' }}>USE →</span>
+                  <span style={{ marginLeft: 'auto', fontSize: 10, color: '#00d4aa', fontWeight: 700, letterSpacing: '0.04em' }}>USE</span>
                 </button>
               ))}
             </div>
           </div>
         )}
 
-        <div style={{ marginTop: 24, fontSize: 10, color: '#1e293b', textAlign: 'center' }}>
-          StockPulse © 2025 · AI-Powered Market Intelligence
+        <div style={{ marginTop: 24, fontSize: 10, color: '#334155', textAlign: 'center', fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.06em' }}>
+          STOCKPULSE © 2025 · DATA VIA YAHOO FINANCE · NOT INVESTMENT ADVICE
         </div>
       </div>
     </div>
@@ -345,7 +435,7 @@ function InputField({ label, id, placeholder, value, onChange, error, autoComple
           borderRadius: 10, color: '#e2e8f0', fontSize: 14, outline: 'none', transition: 'all 0.2s',
         }}
       />
-      {error && <div style={{ fontSize: 11, color: '#ff4d6d', marginTop: 4 }}>⚠ {error}</div>}
+      {error && <div style={{ fontSize: 11, color: '#ff4d6d', marginTop: 4, fontFamily: 'JetBrains Mono, monospace' }}><span style={{ opacity: 0.7, marginRight: 6 }}>ERR</span>{error}</div>}
     </div>
   )
 }

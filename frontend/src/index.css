@@ -253,6 +253,164 @@ select.sp-input {
 .animate-fade-in { animation: fadeIn 0.3s ease-out; }
 .animate-slide-up { animation: slideUp 0.35s ease-out; }
 
+/* ─────────────────────────────────────────────
+   STOCK-MARKET THEME ELEMENTS
+───────────────────────────────────────────── */
+
+/* Bull / Bear color tokens */
+:root {
+  --bull: #00d4aa;
+  --bull-soft: rgba(0, 212, 170, 0.12);
+  --bear: #ff4d6d;
+  --bear-soft: rgba(255, 77, 109, 0.12);
+  --gold: #f5b942;
+  --grid: rgba(0, 212, 170, 0.045);
+  --grid-strong: rgba(0, 212, 170, 0.09);
+}
+
+/* ── Chart-grid background (Bloomberg-style faint trading grid) ── */
+.chart-grid-bg {
+  background-color: #080810;
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
+    radial-gradient(ellipse at top left, rgba(0,212,170,0.05) 0%, transparent 55%),
+    radial-gradient(ellipse at bottom right, rgba(99,102,241,0.05) 0%, transparent 55%);
+  background-size: 56px 56px, 56px 56px, 100% 100%, 100% 100%;
+  background-position: -1px -1px, -1px -1px, 0 0, 0 0;
+}
+
+.chart-grid-bg-subtle {
+  background-image:
+    linear-gradient(rgba(255,255,255,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.018) 1px, transparent 1px);
+  background-size: 40px 40px;
+}
+
+/* ── Ticker tape (continuous scroll) ── */
+@keyframes tickerScroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.ticker-strip {
+  overflow: hidden;
+  position: relative;
+  background: linear-gradient(180deg, rgba(0,212,170,0.04), rgba(8,8,16,0.92));
+  border-top: 1px solid rgba(0,212,170,0.12);
+  border-bottom: 1px solid rgba(0,212,170,0.08);
+  height: 32px;
+  display: flex;
+  align-items: center;
+}
+
+.ticker-strip::before,
+.ticker-strip::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 80px;
+  z-index: 2;
+  pointer-events: none;
+}
+.ticker-strip::before { left: 0;  background: linear-gradient(90deg, #08081f, transparent); }
+.ticker-strip::after  { right: 0; background: linear-gradient(-90deg, #08081f, transparent); }
+
+.ticker-track {
+  display: flex;
+  gap: 28px;
+  white-space: nowrap;
+  animation: tickerScroll 60s linear infinite;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 12px;
+  padding-left: 28px;
+}
+
+.ticker-strip:hover .ticker-track { animation-play-state: paused; }
+
+.ticker-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: #e2e8f0;
+}
+.ticker-item .sym { color: #94a3b8; font-weight: 700; letter-spacing: 0.04em; }
+.ticker-item .px  { color: #e2e8f0; }
+.ticker-item.up   .chg { color: var(--bull); }
+.ticker-item.down .chg { color: var(--bear); }
+.ticker-item.up   .arrow,
+.ticker-item.down .arrow { font-size: 10px; }
+.ticker-item .sep { color: #1e293b; }
+
+/* ── Candlestick mini ── */
+.candle {
+  display: inline-block;
+  width: 6px;
+  position: relative;
+}
+.candle::before {
+  content: '';
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 0; bottom: 0;
+  width: 1.5px;
+  background: currentColor;
+  opacity: 0.55;
+}
+.candle .body {
+  display: block;
+  width: 100%;
+  background: currentColor;
+  border-radius: 1px;
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Animated sparkline border ── */
+@keyframes sparkPulse {
+  0%, 100% { opacity: 0.55; }
+  50%      { opacity: 1; }
+}
+
+/* ── Market open / closed dot ── */
+.market-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--bull);
+  box-shadow: 0 0 0 0 rgba(0,212,170,0.7);
+  animation: marketPulseDot 2s infinite;
+}
+@keyframes marketPulseDot {
+  0%   { box-shadow: 0 0 0 0 rgba(0,212,170,0.6); }
+  70%  { box-shadow: 0 0 0 8px rgba(0,212,170,0); }
+  100% { box-shadow: 0 0 0 0 rgba(0,212,170,0); }
+}
+
+/* ── Ambient floating candles for login art ── */
+@keyframes floatCandle {
+  0%, 100% { transform: translateY(0) rotate(0); }
+  50%      { transform: translateY(-12px) rotate(0.5deg); }
+}
+.floating-candles { animation: floatCandle 6s ease-in-out infinite; }
+
+/* ── Chart-line loader ── */
+@keyframes chartDraw {
+  0%   { stroke-dashoffset: 200; }
+  60%  { stroke-dashoffset: 0; }
+  100% { stroke-dashoffset: -200; }
+}
+@keyframes chartDot {
+  0%, 100% { transform: translateY(0) scale(1); opacity: 1; }
+  50%      { transform: translateY(-3px) scale(1.15); opacity: 0.6; }
+}
+
+/* ── Subtle scanline shimmer for premium cards ── */
+@keyframes scan {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(100%); }
+}
+
 /* ── Recharts tooltip ── */
 .recharts-tooltip-wrapper .recharts-default-tooltip {
   background: #1a1a2e !important;

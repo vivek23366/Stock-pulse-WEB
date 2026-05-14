@@ -15,7 +15,6 @@ export default function SellModal({ holdings = [], onClose, onSell, loading }) {
   if (!holdings.length) return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="glass-card-elevated animate-slide-up" style={{ width: '100%', maxWidth: 400, padding: 28, margin: 16, textAlign: 'center' }}>
-        <div style={{ fontSize: 32, marginBottom: 12 }}>💼</div>
         <div style={{ color: '#64748b', fontSize: 14, marginBottom: 20 }}>No holdings to sell.</div>
         <button className="btn-secondary" onClick={onClose} style={{ width: '100%' }}>Close</button>
       </div>

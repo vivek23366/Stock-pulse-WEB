@@ -43,32 +43,32 @@ function generateSignal(data) {
 
   // Strong BUY
   if (trend === 'bullish' && cp > 1.5) return {
-    type: 'BUY', color: '#00d4aa', bg: 'rgba(0,212,170,0.1)', icon: '🚀',
+    type: 'BUY', color: '#00d4aa', bg: 'rgba(0,212,170,0.1)',
     label: 'Strong Buy', reason: `Bullish trend + ${fmt(cp)}% gain. Momentum is positive.`,
   }
   // Near support → BUY
   if (sup > 0 && price > 0 && (price - sup) / price < 0.02 && trend !== 'bearish') return {
-    type: 'BUY', color: '#00d4aa', bg: 'rgba(0,212,170,0.1)', icon: '📈',
+    type: 'BUY', color: '#00d4aa', bg: 'rgba(0,212,170,0.1)',
     label: 'Buy (Support)', reason: `Price is within 2% of support ($${fmt(sup)}). Potential bounce.`,
   }
   // Strong SELL
   if (trend === 'bearish' && cp < -1.5) return {
-    type: 'SELL', color: '#ff4d6d', bg: 'rgba(255,77,109,0.1)', icon: '📉',
+    type: 'SELL', color: '#ff4d6d', bg: 'rgba(255,77,109,0.1)',
     label: 'Strong Sell', reason: `Bearish trend + ${fmt(cp)}% drop. Consider reducing exposure.`,
   }
   // Near resistance → SELL
   if (res > 0 && price > 0 && (res - price) / price < 0.02) return {
-    type: 'SELL', color: '#ff4d6d', bg: 'rgba(255,77,109,0.1)', icon: '🔴',
+    type: 'SELL', color: '#ff4d6d', bg: 'rgba(255,77,109,0.1)',
     label: 'Sell (Resistance)', reason: `Price is within 2% of resistance ($${fmt(res)}). Potential reversal.`,
   }
   // High volatility → CAUTION
   if (ann > 45) return {
-    type: 'CAUTION', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', icon: '⚠️',
+    type: 'CAUTION', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)',
     label: 'High Risk', reason: `Annual volatility ${fmt(ann)}% is extreme. Risk management advised.`,
   }
   // Neutral
   return {
-    type: 'HOLD', color: '#94a3b8', bg: 'rgba(148,163,184,0.08)', icon: '⏸',
+    type: 'HOLD', color: '#94a3b8', bg: 'rgba(148,163,184,0.08)',
     label: 'Hold / Watch', reason: `No strong signal. Trend: ${trend || 'unknown'}. Monitor for breakout.`,
   }
 }
@@ -82,20 +82,19 @@ function generateAlerts(data, prevData) {
   const price = Number(data.price ?? 0)
 
   if (Math.abs(cp) > 3)
-    alerts.push({ icon: '🔥', msg: `Extreme move: ${cp > 0 ? '+' : ''}${fmt(cp)}% today`, color: cp > 0 ? '#00d4aa' : '#ff4d6d' })
+    alerts.push({ msg: `Extreme move: ${cp > 0 ? '+' : ''}${fmt(cp)}% today`, color: cp > 0 ? '#00d4aa' : '#ff4d6d' })
   if (ann > 50)
-    alerts.push({ icon: '⚡', msg: `Very high volatility: ${fmt(ann)}% annual`, color: '#f59e0b' })
+    alerts.push({ msg: `Very high volatility: ${fmt(ann)}% annual`, color: '#f59e0b' })
   if (data.support && Math.abs(price - Number(data.support)) / price < 0.015)
-    alerts.push({ icon: '🛡', msg: `Near support $${fmt(data.support)}`, color: '#6366f1' })
+    alerts.push({ msg: `Near support $${fmt(data.support)}`, color: '#6366f1' })
   if (data.resistance && Math.abs(price - Number(data.resistance)) / price < 0.015)
-    alerts.push({ icon: '🚧', msg: `Near resistance $${fmt(data.resistance)}`, color: '#f59e0b' })
+    alerts.push({ msg: `Near resistance $${fmt(data.resistance)}`, color: '#f59e0b' })
 
   if (prevData) {
     const prev = Number(prevData.price ?? 0)
     const change30s = price - prev
     if (Math.abs(change30s) > prev * 0.005)
       alerts.push({
-        icon: change30s > 0 ? '📈' : '📉',
         msg: `30s move: ${change30s > 0 ? '+' : ''}$${Math.abs(change30s).toFixed(2)}`,
         color: change30s > 0 ? '#00d4aa' : '#ff4d6d',
       })
@@ -283,9 +282,9 @@ function WatchCard({ sym, color, onRemove, showToast }) {
               borderRadius: 10, padding: '12px 16px', marginBottom: 16,
               display: 'flex', alignItems: 'flex-start', gap: 12,
             }}>
-              <span style={{ fontSize: 22 }}>{signal.icon}</span>
+              <span style={{ width: 3, alignSelf: 'stretch', background: signal.color, borderRadius: 2 }} />
               <div>
-                <div style={{ fontSize: 13, fontWeight: 800, color: signal.color, marginBottom: 3 }}>
+                <div style={{ fontSize: 13, fontWeight: 800, color: signal.color, marginBottom: 3, letterSpacing: '0.02em' }}>
                   {signal.type} — {signal.label}
                 </div>
                 <div style={{ fontSize: 12, color: '#94a3b8' }}>{signal.reason}</div>
@@ -303,16 +302,17 @@ function WatchCard({ sym, color, onRemove, showToast }) {
           {liveAlerts.length > 0 && (
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>
-                🔔 Live Alerts
+                Live Alerts
               </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {liveAlerts.map((a, i) => (
                   <div key={i} style={{
                     background: `${a.color}12`, border: `1px solid ${a.color}30`,
                     borderRadius: 8, padding: '5px 12px', fontSize: 12,
-                    color: a.color, display: 'flex', alignItems: 'center', gap: 6,
+                    color: a.color, display: 'flex', alignItems: 'center', gap: 8,
                   }}>
-                    {a.icon} {a.msg}
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', background: a.color, flexShrink: 0 }} />
+                    {a.msg}
                   </div>
                 ))}
               </div>
@@ -434,7 +434,7 @@ function WatchCard({ sym, color, onRemove, showToast }) {
 }
 
 /* ═══════════════════════════════════════════════════════════ */
-export default function WatchMode({ showToast }) {
+export default function WatchMode({ showToast, autoLoad }) {
   const [watchList, setWatchList]   = useState(['AAPL'])
   const [input, setInput]           = useState('')
   const [suggestions, setSuggestions] = useState([])
@@ -451,6 +451,11 @@ export default function WatchMode({ showToast }) {
     document.addEventListener('mousedown', h)
     return () => document.removeEventListener('mousedown', h)
   }, [])
+
+  /* Deep-link from Learn tab — kick off live watch with the default basket.
+     Intentionally fires only once on mount. */
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  useEffect(() => { if (autoLoad) setRunning(true) }, [])
 
   /* Autocomplete */
   const fetchSugg = useCallback((q) => {
@@ -508,30 +513,32 @@ export default function WatchMode({ showToast }) {
     <div className="animate-slide-up">
       {/* Header */}
       <div style={{ marginBottom: 28 }}>
-        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e2e8f0', marginBottom: 6 }}>
-          🛰 Live Watch Mode
+        <h1 style={{ fontSize: 24, fontWeight: 700, color: '#e2e8f0', marginBottom: 6, letterSpacing: '-0.015em' }}>
+          Live Watch
         </h1>
         <p style={{ color: '#64748b', fontSize: 14 }}>
-          Monitor up to 6 stocks simultaneously · Auto-refresh every 30s · Smart signals &amp; alerts
+          Monitor up to 6 tickers · auto-refresh 30s · signals &amp; alerts
         </p>
       </div>
 
       {/* Feature callouts */}
-      <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: 22 }}>
+      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 22 }}>
         {[
-          ['🚀', 'Buy/Sell Signals'],
-          ['🔔', 'Smart Alerts'],
-          ['📈', 'Live Trend Detection'],
-          ['⚡', 'Risk Analysis'],
-          ['🛡', 'Support/Resistance'],
-          ['🕹', 'Multi-Stock Dashboard'],
-        ].map(([icon, label]) => (
+          'Buy/Sell Signals',
+          'Smart Alerts',
+          'Trend Detection',
+          'Risk Analysis',
+          'Support/Resistance',
+          'Multi-Stock Dashboard',
+        ].map(label => (
           <div key={label} style={{
-            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
-            borderRadius: 20, padding: '4px 14px', fontSize: 12, color: '#94a3b8',
-            display: 'flex', alignItems: 'center', gap: 6,
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)',
+            borderRadius: 6, padding: '4px 10px', fontSize: 11, color: '#94a3b8',
+            display: 'flex', alignItems: 'center', gap: 7,
+            fontFamily: 'JetBrains Mono, monospace', letterSpacing: '0.02em',
           }}>
-            {icon} {label}
+            <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#00d4aa', opacity: 0.7 }} />
+            {label}
           </div>
         ))}
       </div>
@@ -681,13 +688,16 @@ export default function WatchMode({ showToast }) {
       {!running && watchList.length > 0 && (
         <div style={{
           textAlign: 'center', padding: '48px 0', color: '#334155',
-          border: '2px dashed rgba(255,255,255,0.06)', borderRadius: 16,
+          border: '1px dashed rgba(255,255,255,0.08)', borderRadius: 12,
         }}>
-          <div style={{ fontSize: 36, marginBottom: 12 }}>🛰</div>
-          <div style={{ fontSize: 16, color: '#64748b', marginBottom: 8 }}>
+          <div style={{
+            fontSize: 10, color: '#64748b', letterSpacing: '0.16em',
+            fontFamily: 'JetBrains Mono, monospace', marginBottom: 14,
+          }}>— STANDBY —</div>
+          <div style={{ fontSize: 15, color: '#94a3b8', marginBottom: 6, fontWeight: 600 }}>
             {watchList.length} ticker{watchList.length !== 1 ? 's' : ''} ready to watch
           </div>
-          <div style={{ fontSize: 13, color: '#334155' }}>
+          <div style={{ fontSize: 13, color: '#475569' }}>
             Press <strong style={{ color: '#00d4aa' }}>Start All</strong> to begin live monitoring
           </div>
         </div>

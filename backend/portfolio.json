@@ -1,13 +1,9 @@
 {
-  "balance": 6981.48,
+  "balance": 7508.530000000001,
   "holdings": {
     "AAPL": {
-      "shares": 8.0,
-      "avg_cost": 260.49
-    },
-    "AMZN": {
-      "shares": 4.0,
-      "avg_cost": 233.65
+      "shares": 9.0,
+      "avg_cost": 276.83
     }
   }
 }

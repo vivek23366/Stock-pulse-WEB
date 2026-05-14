@@ -67,24 +67,24 @@ function explainDecision(data, holding) {
 
   /* Behavioral biases */
   if (holding && Number(holding.pnl_pct) < -10)
-    biases.push({ name: 'Loss Aversion', icon: '🧠', desc: 'You may be holding losers too long hoping to break even.' })
+    biases.push({ name: 'Loss Aversion', severity: 'warn', desc: 'You may be holding losers too long hoping to break even.' })
   if (cp > 4)
-    biases.push({ name: 'FOMO Risk', icon: '🚨', desc: `${fmt(cp)}% spike may trigger emotional overbuying. Stay rational.` })
+    biases.push({ name: 'FOMO Risk', severity: 'warn', desc: `${fmt(cp)}% spike may trigger emotional overbuying. Stay rational.` })
   if (cp < -4)
-    biases.push({ name: 'Panic Risk', icon: '😰', desc: 'Steep drop may trigger panic selling. Verify fundamentals first.' })
+    biases.push({ name: 'Panic Risk', severity: 'warn', desc: 'Steep drop may trigger panic selling. Verify fundamentals first.' })
   if (holding && Number(holding.pnl_pct) > 20)
-    biases.push({ name: 'Disposition Effect', icon: '💰', desc: 'You may sell winners too early. Let profits run if trend holds.' })
+    biases.push({ name: 'Disposition Effect', severity: 'warn', desc: 'You may sell winners too early. Let profits run if trend holds.' })
   if (!biases.length)
-    biases.push({ name: 'No Bias Detected', icon: '✅', desc: 'No major behavioral traps detected for this position.' })
+    biases.push({ name: 'No Bias Detected', severity: 'ok', desc: 'No major behavioral traps detected for this position.' })
 
   /* Market regime */
-  let regime = 'Sideways', regimeColor = '#f59e0b', regimeIcon = '〰️'
-  if (trend === 'bullish' && ann < 25)    { regime = 'Bull Run';  regimeColor = '#00d4aa'; regimeIcon = '🐂' }
-  else if (trend === 'bullish' && ann > 35){ regime = 'Volatile Bull'; regimeColor = '#34d399'; regimeIcon = '⚡' }
-  else if (trend === 'bearish' && ann < 25){ regime = 'Bear Market'; regimeColor = '#ff4d6d'; regimeIcon = '🐻' }
-  else if (trend === 'bearish' && ann > 35){ regime = 'Crash Risk'; regimeColor = '#a78bfa'; regimeIcon = '💥' }
+  let regime = 'Sideways', regimeColor = '#f59e0b'
+  if (trend === 'bullish' && ann < 25)    { regime = 'Bull Run';  regimeColor = '#00d4aa' }
+  else if (trend === 'bullish' && ann > 35){ regime = 'Volatile Bull'; regimeColor = '#34d399' }
+  else if (trend === 'bearish' && ann < 25){ regime = 'Bear Market'; regimeColor = '#ff4d6d' }
+  else if (trend === 'bearish' && ann > 35){ regime = 'Crash Risk'; regimeColor = '#a78bfa' }
 
-  return { signal, confidence, signalColor, factors, biases, regime, regimeColor, regimeIcon, rl }
+  return { signal, confidence, signalColor, factors, biases, regime, regimeColor, rl }
 }
 
 /* ─── Sub-components ───────────────────────────────────────── */
@@ -209,9 +209,8 @@ function AIPanel({ portfolio, showToast }) {
 
             {/* Regime */}
             <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Market Regime</div>
-              <div style={{ fontSize: 22 }}>{aiData.regimeIcon}</div>
-              <div style={{ fontSize: 12, fontWeight: 700, color: aiData.regimeColor }}>{aiData.regime}</div>
+              <div style={{ fontSize: 11, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Market Regime</div>
+              <div style={{ fontSize: 14, fontWeight: 800, color: aiData.regimeColor, letterSpacing: '0.01em' }}>{aiData.regime}</div>
             </div>
 
             {/* Risk */}
@@ -227,7 +226,7 @@ function AIPanel({ portfolio, showToast }) {
           </div>
 
           {/* ── Explainable AI Factors ── */}
-          <SectionLabel>🧩 Explainable AI — Decision Factors</SectionLabel>
+          <SectionLabel>Decision Factors</SectionLabel>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 20 }}>
             {aiData.factors.map((f, i) => (
               <div key={i} style={{
@@ -251,15 +250,19 @@ function AIPanel({ portfolio, showToast }) {
           </div>
 
           {/* ── Behavioral Bias Detection ── */}
-          <SectionLabel>🧠 Behavioral Bias Detection</SectionLabel>
+          <SectionLabel>Behavioral Bias Detection</SectionLabel>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(260px,1fr))', gap: 12, marginBottom: 20 }}>
             {aiData.biases.map((b, i) => (
               <div key={i} style={{
                 background: 'rgba(255,255,255,0.02)', border: '1px solid rgba(255,255,255,0.06)',
                 borderRadius: 10, padding: '14px 16px',
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-                  <span style={{ fontSize: 20 }}>{b.icon}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+                  <span style={{
+                    width: 8, height: 8, borderRadius: '50%',
+                    background: b.severity === 'ok' ? '#00d4aa' : '#f59e0b',
+                    flexShrink: 0,
+                  }} />
                   <span style={{ fontSize: 13, fontWeight: 700, color: '#e2e8f0' }}>{b.name}</span>
                 </div>
                 <div style={{ fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>{b.desc}</div>
@@ -268,7 +271,7 @@ function AIPanel({ portfolio, showToast }) {
           </div>
 
           {/* ── Adaptive Trader Metrics bar chart ── */}
-          <SectionLabel>⚙️ Adaptive Metrics — {aiData.symbol}</SectionLabel>
+          <SectionLabel>Adaptive Metrics — {aiData.symbol}</SectionLabel>
           <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: '16px', border: '1px solid rgba(255,255,255,0.05)', marginBottom: 20 }}>
             <ResponsiveContainer width="100%" height={180}>
               <BarChart
@@ -308,7 +311,7 @@ function AIPanel({ portfolio, showToast }) {
       {/* ── Decision Replay System ── */}
       {replay.length > 0 && (
         <>
-          <SectionLabel>🎬 Decision Replay Log</SectionLabel>
+          <SectionLabel>Decision Replay Log</SectionLabel>
           <div className="glass-card" style={{ overflow: 'hidden' }}>
             <div style={{ overflowX: 'auto' }}>
               <table className="sp-table">
@@ -414,8 +417,8 @@ export default function PaperTrading({ showToast }) {
   }))
 
   const TABS = [
-    { key: 'portfolio', label: '💼 Portfolio' },
-    { key: 'ai',        label: '🤖 AI Advisor' },
+    { key: 'portfolio', label: 'Portfolio' },
+    { key: 'ai',        label: 'Strategy' },
   ]
 
   return (
@@ -479,8 +482,7 @@ export default function PaperTrading({ showToast }) {
                   <div className="section-header">Holdings</div>
                 </div>
                 {portfolio.holdings.length === 0 ? (
-                  <div style={{ padding: '40px 20px', textAlign: 'center', color: '#334155', fontSize: 13 }}>
-                    <div style={{ fontSize: 32, marginBottom: 12 }}>💼</div>
+                  <div style={{ padding: '40px 20px', textAlign: 'center', color: '#475569', fontSize: 13 }}>
                     No holdings yet. Click <strong style={{ color: '#00d4aa' }}>+ Buy</strong> to get started.
                   </div>
                 ) : (
@@ -588,7 +590,7 @@ export default function PaperTrading({ showToast }) {
             </>
           )}
 
-          {/* ── AI Advisor tab ── */}
+          {/* ── Strategy tab ── */}
           {activeTab === 'ai' && (
             <AIPanel portfolio={portfolio} showToast={showToast} />
           )}

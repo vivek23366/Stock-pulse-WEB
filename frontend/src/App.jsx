@@ -1,19 +1,19 @@
 import { useState, useEffect, useCallback } from 'react'
 import Navbar from './components/Navbar'
 import StockSearch from './components/StockSearch'
-import CompareTable from './components/CompareTable'
-import MarketPulse from './components/MarketPulse'
+import Analyze from './components/Analyze'
 import WatchMode from './components/WatchMode'
 import PaperTrading from './components/PaperTrading'
+import Learn from './components/Learn'
 import Toast from './components/Toast'
 import LoginPage, { saveSession, clearSession } from './components/LoginPage'
 
 const TABS = [
-  { id: 'search',  label: 'Search',  icon: '🔍' },
-  { id: 'compare', label: 'Compare', icon: '⚖️' },
-  { id: 'pulse',   label: 'Pulse',   icon: '📡' },
-  { id: 'watch',   label: 'Watch',   icon: '👁' },
-  { id: 'trade',   label: 'Trade',   icon: '💼' },
+  { id: 'search',  label: 'Quote' },
+  { id: 'analyze', label: 'Analyze' },
+  { id: 'watch',   label: 'Watchlist' },
+  { id: 'trade',   label: 'Portfolio' },
+  { id: 'learn',   label: 'Learn' },
 ]
 
 /* ─── User avatar pill ─────────────────────────────────────── */
@@ -35,10 +35,14 @@ function UserPill({ user, onLogout }) {
       >
         <span style={{
           width: 28, height: 28, borderRadius: '50%',
-          background: 'linear-gradient(135deg,#00d4aa,#6366f1)',
+          background: 'rgba(0,212,170,0.18)',
+          border: '1px solid rgba(0,212,170,0.4)',
+          color: '#00d4aa',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 14,
-        }}>{user.avatar || '👤'}</span>
+          fontSize: 12, fontWeight: 700,
+          fontFamily: 'JetBrains Mono, monospace',
+          letterSpacing: '0.02em',
+        }}>{(user.name || user.username || '?').slice(0, 2).toUpperCase()}</span>
         {user.name}
         <span style={{ color: '#64748b', fontSize: 11 }}>{open ? '▲' : '▼'}</span>
       </button>
@@ -63,7 +67,7 @@ function UserPill({ user, onLogout }) {
             onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,77,109,0.08)'}
             onMouseLeave={e => e.currentTarget.style.background = 'none'}
           >
-            🚪 Sign Out
+            Sign Out
           </button>
         </div>
       )}
@@ -91,7 +95,20 @@ export default function App() {
   const [user, setUser]         = useState(null)
   const [authReady, setAuthReady] = useState(false)
   const [activeTab, setActiveTab] = useState('search')
+  const [autoLoad, setAutoLoad]   = useState(false)   // true when tab was reached via a Learn deep-link
   const [toast, setToast]       = useState(null)
+
+  /* Plain navbar click — switch tabs but don't trigger auto-fetch */
+  const switchTab = useCallback((tabId) => {
+    setActiveTab(tabId)
+    setAutoLoad(false)
+  }, [])
+
+  /* Deep-link from the Learn tab — switch + ask destination to auto-fetch its default view */
+  const jumpToTab = useCallback((tabId) => {
+    setActiveTab(tabId)
+    setAutoLoad(true)
+  }, [])
 
   /* Restore session on mount — verify JWT with backend */
   useEffect(() => {
@@ -116,13 +133,14 @@ export default function App() {
 
   const handleLogin = (userData) => {
     setUser(userData)
-    showToast(`Welcome back, ${userData.name}! 🎉`, 'success')
+    showToast(`Signed in as ${userData.name}`, 'success')
   }
 
   const handleLogout = () => {
     clearSession()
     setUser(null)
     setActiveTab('search')
+    setAutoLoad(false)
     setToast(null)
   }
 
@@ -133,10 +151,10 @@ export default function App() {
   if (!user) return <LoginPage onLogin={handleLogin} />
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: '#080810' }}>
+    <div className="min-h-screen chart-grid-bg">
       {/* Navbar with user pill injected */}
       <div style={{ position: 'relative' }}>
-        <Navbar activeTab={activeTab} onTabChange={setActiveTab} tabs={TABS} />
+        <Navbar activeTab={activeTab} onTabChange={switchTab} tabs={TABS} />
         {/* User pill — absolutely positioned in top-right of navbar */}
         <div style={{ position: 'absolute', top: '50%', right: 20, transform: 'translateY(-50%)', zIndex: 100 }}>
           <UserPill user={user} onLogout={handleLogout} />
@@ -145,11 +163,11 @@ export default function App() {
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         <div className="animate-fade-in" key={activeTab}>
-          {activeTab === 'search'  && <StockSearch showToast={showToast} />}
-          {activeTab === 'compare' && <CompareTable showToast={showToast} />}
-          {activeTab === 'pulse'   && <MarketPulse showToast={showToast} />}
-          {activeTab === 'watch'   && <WatchMode showToast={showToast} />}
+          {activeTab === 'search'  && <StockSearch showToast={showToast} autoLoad={autoLoad} />}
+          {activeTab === 'analyze' && <Analyze showToast={showToast} autoLoad={autoLoad} />}
+          {activeTab === 'watch'   && <WatchMode showToast={showToast} autoLoad={autoLoad} />}
           {activeTab === 'trade'   && <PaperTrading showToast={showToast} />}
+          {activeTab === 'learn'   && <Learn onTabChange={jumpToTab} />}
         </div>
       </main>
 

@@ -136,7 +136,7 @@ function PriceRangeBar({ low, high, current, label }) {
 }
 
 /* ═══════════════════════════════════════════════════════════ */
-export default function StockSearch({ showToast }) {
+export default function StockSearch({ showToast, autoLoad }) {
   const [ticker, setTicker]           = useState('')
   const [data, setData]               = useState(null)
   const [loading, setLoading]         = useState(false)
@@ -205,6 +205,11 @@ export default function StockSearch({ showToast }) {
   }
 
   const handleSubmit = (e) => { e?.preventDefault(); setShowDrop(false); doSearch() }
+
+  /* Deep-link from Learn tab — load a sample ticker so the user sees real data.
+     Intentionally fires only once on mount. */
+  // eslint-disable-next-line react-hooks/exhaustive-deps, react-hooks/set-state-in-effect
+  useEffect(() => { if (autoLoad) { setTicker('AAPL'); doSearch('AAPL') } }, [])
 
   /* Derived */
   const changeColor = data && data.change_percent >= 0 ? '#00d4aa' : '#ff4d6d'
@@ -362,7 +367,7 @@ export default function StockSearch({ showToast }) {
             {/* Bar: Max Gain / Max Loss / Volatility */}
             <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', marginBottom: 12 }}>
-                ⚡ Gain / Loss / Volatility (%)
+                Gain / Loss / Volatility (%)
               </div>
               <ResponsiveContainer width="100%" height={180}>
                 <BarChart data={gainLossData} layout="vertical" margin={{ top: 0, right: 16, left: 0, bottom: 0 }}>
@@ -401,7 +406,7 @@ export default function StockSearch({ showToast }) {
             {/* Risk Gauge (Radial Bar) */}
             <div style={{ background: 'rgba(255,255,255,0.02)', borderRadius: 12, padding: '16px 12px', border: '1px solid rgba(255,255,255,0.05)', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
               <div style={{ fontSize: 12, fontWeight: 700, color: '#94a3b8', marginBottom: 4, alignSelf: 'flex-start' }}>
-                🎯 Risk Gauge
+                Risk Gauge
               </div>
               <ResponsiveContainer width="100%" height={160}>
                 <RadialBarChart
