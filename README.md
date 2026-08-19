@@ -246,8 +246,12 @@ MIT License — feel free to use this code for any purpose.
 
 ---
 
-## 👤 Author
+## Contributors
 
-Built by **Vivek** — A full-stack stock analytics platform powered by real market data.
+- **[Vivek Solanki](https://github.com/vivek23366)** — terminal dashboard, Yahoo Finance
+  data layer, analysis modules, Compare/Market Pulse/Learn tabs
+- **[Sushant Dagar](https://github.com/Sushant-Dagar)** — FastAPI service and REST
+  endpoints, JWT authentication, paper-trading portfolio, environment-based
+  configuration
 
 > *"The stock market is a device for transferring money from the impatient to the patient."* — Warren Buffett
