@@ -37,3 +37,4 @@ Thumbs.db
 # Local runtime state
 backend/users.json
 backend/portfolio.json
+.claude/

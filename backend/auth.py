@@ -14,7 +14,7 @@ from passlib.context import CryptContext
 from jose import JWTError, jwt
 
 # ── Config ────────────────────────────────────────────────────────────────────
-SECRET_KEY  = "stockpulse-super-secret-key-change-in-prod-2025"
+SECRET_KEY = os.getenv("STOCKPULSE_SECRET_KEY", "dev-only-insecure-key")
 ALGORITHM   = "HS256"
 TOKEN_HOURS = 24 * 7           # 7-day sessions
 
