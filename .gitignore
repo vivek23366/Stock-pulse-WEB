@@ -33,3 +33,7 @@ Thumbs.db
 # Local config
 .env
 *.local
+
+# Local runtime state
+backend/users.json
+backend/portfolio.json
