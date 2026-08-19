@@ -101,6 +101,13 @@ stock-pulse/
 ### Prerequisites
 - **Python 3.8+** with pip
 - **Node.js 18+** with npm
+### Environment
+
+Copy `.env.example` and set:
+
+- `STOCKPULSE_SECRET_KEY` — JWT signing key. Generate with
+  `python -c "import secrets; print(secrets.token_hex(32))"`.
+  Without it the app falls back to an insecure development default.
 
 ### Option 1 — One-Click Start (Windows)
 
@@ -118,7 +125,8 @@ This automatically:
 
 **Terminal 1 — Backend:**
 ```bash
-pip install fastapi uvicorn[standard] yfinance pandas python-multipart PyJWT
+pip install -r backend/requirements.txt
+pip install -r requirements.txt
 python -m uvicorn backend.main:app --reload --port 8000
 ```
 
