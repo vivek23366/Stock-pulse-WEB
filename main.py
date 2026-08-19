@@ -80,7 +80,8 @@ def compare_stocks(tickers: List[str], analyzer: StockAnalyzer):
     found = {c['symbol'] for c in comparisons}
     not_found = [t.upper() for t in tickers if t.upper() not in found]
     if not_found:
-        print(f"\n{TerminalDisplay.error(f'Could not find: {', '.join(not_found)}')}")
+        missing = ", ".join(not_found)
+        print(f"\n{TerminalDisplay.error(f'Could not find: {missing}')}")
 
 
 def market_pulse(analyzer: StockAnalyzer, tickers: List[str] = None):
@@ -120,7 +121,8 @@ def watch_stock(ticker: str, fetcher: StockFetcher, interval: int = 30):
                 print(TerminalDisplay.stock_card(info, hist))
 
                 # Show last update time
-                print(f"\n  {TerminalDisplay.info(f'Last update: {time.strftime('%H:%M:%S')}')}")
+                timestamp = time.strftime("%H:%M:%S")
+                print(f"\n  {TerminalDisplay.info(f'Last update: {timestamp}')}")
                 print(f"  {TerminalDisplay.info(f'Next update in {interval}s (Ctrl+C to exit)')}")
             else:
                 print(TerminalDisplay.error(f"Could not fetch data for {ticker}"))
